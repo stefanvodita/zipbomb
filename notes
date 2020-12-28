@@ -1,0 +1,140 @@
+Zip structure explanations:
+https://en.wikipedia.org/wiki/ZIP_(file_format)#File_headers
+
+!   -> this field should be changed in a more thorough implementation
+!!  -> this field will throw an error if unchanged
+!!! -> this filed must be changed for successful unzipping
+
+File header:
+0	4	Local file header signature = 0x04034b50 (read as a little-endian number)
+4	2	Version needed to extract (minimum)
+6	2	General purpose bit flag
+8	2	Compression method
+10	2	File last modification time
+12	2	File last modification date
+14	4	CRC-32 of uncompressed data                     !!
+18	4	Compressed size                                 !!!
+22	4	Uncompressed size                               !!!
+26	2	File name length (n)                            !
+28	2	Extra field length (m)
+30	n	File name                                       !!!
+30+n	m	Extra field
+
+Central dir header
+0	4	Central directory file header signature = 0x02014b50
+4	2	Version made by
+6	2	Version needed to extract (minimum)
+8	2	General purpose bit flag
+10	2	Compression method
+12	2	File last modification time
+14	2	File last modification date
+16	4	CRC-32 of uncompressed data                     !!
+20	4	Compressed size                                 !!!
+24	4	Uncompressed size                               !!!
+28	2	File name length (n)                            !
+30	2	Extra field length (m)
+32	2	File comment length (k)
+34	2	Disk number where file starts
+36	2	Internal file attributes
+38	4	External file attributes
+42	4	Relative offset of local file header.           !!!
+                This is the number of bytes between the start of the first disk on which the file occurs, and the start of the local file header. This allows software reading the central directory to locate the position of the file inside the ZIP file.
+46	n	File name                                       !!!
+46+n	m	Extra field
+46+n+m	k	File comment
+
+End of Central dir record
+0	4	End of central directory signature = 0x06054b50
+4	2	Number of this disk
+6	2	Disk where central directory starts
+8	2	Number of central directory records on this disk    !!!
+10	2	Total number of central directory records           !!!
+12	4	Size of central directory (bytes)                   !!!
+16	4	Offset of start of central directory,               !!!
+                relative to start of archive
+20	2	Comment length (n)
+22	n	Comment
+
+Create archive:
+./zipbomb --num-files=1 --compressed-size=16 > tmp.zip
+
+Result (xxd):
+00000000: 504b 0304 1400 0000 0800 a06c 4805 e21e  PK.........lH...                                                     
+00000010: 38bb 1000 0000 0904 0000 0100 0000 30ed  8.............0.                                                     
+00000020: c081 0800 0000 c030 d6fb 4b5c 640b 6050  .......0..K\d.`P                                                     
+00000030: 4b01 0214 0014 0000 0008 00a0 6c48 05e2  K...........lH..                                                     
+00000040: 1e38 bb10 0000 0009 0400 0001 0000 0000  .8..............                                                     
+00000050: 0000 0000 0000 0000 0000 0000 0030 504b  .............0PK                                                     
+00000060: 0506 0000 0000 0100 0100 2f00 0000 2f00  ........../.../.                                                     
+00000070: 0000 0000
+
+File header (31 bytes):
+00000000: 504b 0304 1400 0000 0800 a06c 4805 e21e  PK.........lH...                                                     
+00000010: 38bb 1000 0000 0904 0000 0100 0000 30
+
+Kernel (16 bytes):
+                                               ed  8.............0.                                                     
+00000020: c081 0800 0000 c030 d6fb 4b5c 640b 60
+
+Central dir header(47 bytes):
+                                               50  .......0..K\d.`P                                                     
+00000030: 4b01 0214 0014 0000 0008 00a0 6c48 05e2  K...........lH..                                                     
+00000040: 1e38 bb10 0000 0009 0400 0001 0000 0000  .8..............                                                     
+00000050: 0000 0000 0000 0000 0000 0000 0030
+
+End of Central dir record(22 bytes):
+                                             504b  .............0PK                                                     
+00000060: 0506 0000 0000 0100 0100 2f00 0000 2f00  ........../.../.                                                     
+00000070: 0000 0000
+
+
+Create archive:
+./zipbomb --num-files=2 --compressed-size=16 > tmp.zip
+
+Result (xxd):
+00000000: 504b 0304 1400 0000 0800 a06c 4805 d082  PK.........lH...                                                     
+00000010: 46ca 3400 0000 2804 0000 0100 0000 3000  F.4...(.......0.                                                     
+00000020: 1f00 e0ff 504b 0304 1400 0000 0800 a06c  ....PK.........l                                                     
+00000030: 4805 e21e 38bb 1000 0000 0904 0000 0100  H...8...........                                                     
+00000040: 0000 31ed c081 0800 0000 c030 d6fb 4b5c  ..1........0..K\                                                     
+00000050: 640b 6050 4b01 0214 0014 0000 0008 00a0  d.`PK...........                                                     
+00000060: 6c48 05d0 8246 ca34 0000 0028 0400 0001  lH...F.4...(....                                                     
+00000070: 0000 0000 0000 0000 0000 0000 0000 0000  ................                                                     
+00000080: 0030 504b 0102 1400 1400 0000 0800 a06c  .0PK...........l                                                     
+00000090: 4805 e21e 38bb 1000 0000 0904 0000 0100  H...8...........                                                     
+000000a0: 0000 0000 0000 0000 0000 0000 2400 0000  ............$...                                                     
+000000b0: 3150 4b05 0600 0000 0002 0002 005e 0000  1PK..........^..                                                     
+000000c0: 0053 0000 0000 00
+
+File header (31 bytes):
+00000000: 504b 0304 1400 0000 0800 a06c 4805 d082  PK.........lH...                                                     
+00000010: 46ca 3400 0000 2804 0000 0100 0000 30
+
+Quoted block prefix (5 bytes):
+                                               00  F.4...(.......0.                                                     
+00000020: 1f00 e0ff
+
+File header (31 bytes):
+                    504b 0304 1400 0000 0800 a06c  ....PK.........l                                                     
+00000030: 4805 e21e 38bb 1000 0000 0904 0000 0100  H...8...........                                                     
+00000040: 0000 31
+
+Kernel (16 bytes):
+                 ed c081 0800 0000 c030 d6fb 4b5c  ..1........0..K\                                                     
+00000050: 640b 60
+
+Central dir header(47 bytes):
+                 50 4b01 0214 0014 0000 0008 00a0  d.`PK...........                                                     
+00000060: 6c48 05d0 8246 ca34 0000 0028 0400 0001  lH...F.4...(....                                                     
+00000070: 0000 0000 0000 0000 0000 0000 0000 0000  ................                                                     
+00000080: 0030
+
+Central dir header(47 bytes):
+               504b 0102 1400 1400 0000 0800 a06c  .0PK...........l                                                     
+00000090: 4805 e21e 38bb 1000 0000 0904 0000 0100  H...8...........                                                     
+000000a0: 0000 0000 0000 0000 0000 0000 2400 0000  ............$...                                                     
+000000b0: 31
+
+End of Central dir record(22 bytes):
+            50 4b05 0600 0000 0002 0002 005e 0000  1PK..........^..                                                     
+000000c0: 0053 0000 0000 00
