@@ -16,9 +16,9 @@ File header:
 18	4	Compressed size                                 !!!
 22	4	Uncompressed size                               !!!
 26	2	File name length (n)                            !
-28	2	Extra field length (m)
+28	2	Extra field length (m)                          (assumed 0)
 30	n	File name                                       !!!
-30+n	m	Extra field
+30+n	m	Extra field                                 (assumed empty)
 
 Central dir header
 0	4	Central directory file header signature = 0x02014b50
@@ -32,16 +32,16 @@ Central dir header
 20	4	Compressed size                                 !!!
 24	4	Uncompressed size                               !!!
 28	2	File name length (n)                            !
-30	2	Extra field length (m)
-32	2	File comment length (k)
+30	2	Extra field length (m)                          (assumed 0)
+32	2	File comment length (k)                         (assumed 0)
 34	2	Disk number where file starts
 36	2	Internal file attributes
 38	4	External file attributes
 42	4	Relative offset of local file header.           !!!
                 This is the number of bytes between the start of the first disk on which the file occurs, and the start of the local file header. This allows software reading the central directory to locate the position of the file inside the ZIP file.
 46	n	File name                                       !!!
-46+n	m	Extra field
-46+n+m	k	File comment
+46+n	m	Extra field                                 (assumed empty)
+46+n+m	k	File comment                                (assumed empty)
 
 End of Central dir record
 0	4	End of central directory signature = 0x06054b50
@@ -52,8 +52,8 @@ End of Central dir record
 12	4	Size of central directory (bytes)                   !!!
 16	4	Offset of start of central directory,               !!!
                 relative to start of archive
-20	2	Comment length (n)
-22	n	Comment
+20	2	Comment length (n)                                  (assumed 0)
+22	n	Comment                                             (assumed empty)
 
 Create archive:
 ./zipbomb --num-files=1 --compressed-size=16 > tmp.zip
