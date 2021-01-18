@@ -3,7 +3,7 @@ This script provides fucntionality for turning an innocent zip into a zipbomb
 with the overlapped files method.
 Call it like so:
 
-    python3 bombify.zip path.zip count
+    python3 bombifier.py path.zip count
 
 where "path.zip" is the path to your zip and "count" is the number of files
 you want to add to the zip.
