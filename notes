@@ -1,6 +1,8 @@
 Zip structure explanations:
 https://en.wikipedia.org/wiki/ZIP_(file_format)#File_headers
 
+Unzipping tests were done with Ubuntu's unzip comand.
+
 !   -> this field should be changed in a more thorough implementation
 !!  -> this field will throw an error if unchanged
 !!! -> this filed must be changed for successful unzipping
